@@ -1,5 +1,6 @@
 {
   "apiType": "stageMode",
+  "compatibleSdkVersion": "6.1.1(24)",
   "buildOption": {
     "arkOptions": {
       "runtimeOnly": {

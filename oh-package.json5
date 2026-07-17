@@ -3,5 +3,7 @@
   "version": "1.0.0",
   "description": "PEP小学英语",
   "license": "Apache-2.0",
-  "dependencies": {}
+  "dependencies": {
+    "@ohos/hypium": "1.0.21"
+  }
 }
