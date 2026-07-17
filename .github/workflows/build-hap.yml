@@ -7,6 +7,10 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+env:
+  HOS_SDK_HOME: /home/runner/ohos-sdk/command-line-tools/sdk
+  JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,7 +37,6 @@ jobs:
         shell: bash
 
       - name: Setup HarmonyOS CLI Tools
-        id: setup-ohos
         uses: ErBWs/setup-ohos@v2
         with:
           version: 6.1.1.280
@@ -42,34 +45,29 @@ jobs:
       - name: Verify environment
         run: |
           echo "=== Java ==="
-          java -version
+          java -version 2>&1
           echo "=== Node.js ==="
           node -v
-          echo "=== npm ==="
-          npm -v
           echo "=== hvigorw ==="
           which hvigorw
-          hvigorw -v
-          echo "=== ohpm ==="
-          which ohpm
-          ohpm -v
-          echo "=== Environment Variables ==="
+          hvigorw -v 2>&1
+          echo "=== Environment ==="
           echo "HOS_SDK_HOME=$HOS_SDK_HOME"
           echo "JAVA_HOME=$JAVA_HOME"
-          echo "PATH=$PATH"
+          echo "=== SDK Structure ==="
+          ls -la $HOS_SDK_HOME/ 2>/dev/null || echo "SDK not found at HOS_SDK_HOME"
           echo "=== Project Structure ==="
           ls -la
         shell: bash
 
       - name: Install ohpm dependencies
         run: |
-          echo "=== Configuring ohpm ==="
           ohpm config set strict_ssl false
           ohpm config set registry https://ohpm.openharmony.cn/ohpm/
           echo "=== Installing root dependencies ==="
-          ohpm install --no-daemon || echo "Root install failed (may be ok)"
+          ohpm install --no-daemon 2>&1 || echo "Root install warning"
           echo "=== Installing entry dependencies ==="
-          cd entry && ohpm install --no-daemon || echo "Entry install failed (may be ok)"
+          cd entry && ohpm install --no-daemon 2>&1 || echo "Entry install warning"
           cd ..
         shell: bash
 
@@ -77,15 +75,12 @@ jobs:
         run: |
           echo "=== Starting build ==="
           echo "Current directory: $(pwd)"
-          echo "hvigorw location: $(which hvigorw)"
-          echo "=== Cleaning ==="
-          hvigorw clean --no-daemon 2>&1 || echo "Clean failed"
+          hvigorw clean --no-daemon 2>&1
           echo "=== Assembling HAP ==="
           hvigorw assembleHap --mode module \
             -p product=default \
             -p buildMode=debug \
-            --no-daemon 2>&1
-          echo "=== Build completed with exit code: $? ==="
+            --no-daemon --stacktrace 2>&1
         shell: bash
 
       - name: Upload Debug HAP Artifact
