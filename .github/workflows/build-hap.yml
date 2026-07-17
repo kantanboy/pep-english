@@ -33,17 +33,25 @@ jobs:
         shell: bash
 
       - name: Setup HarmonyOS CLI Tools
+        id: setup-ohos
         uses: ErBWs/setup-ohos@v2
         with:
           version: 6.1.1.280
           cache: true
 
-      - name: Verify tools
+      - name: Verify environment
         run: |
           java -version
           node -v
+          npm -v
           hvigorw -v
-          ohpm -v
+        shell: bash
+
+      - name: Install ohpm dependencies
+        run: |
+          ohpm config set strict_ssl false
+          ohpm install
+          cd entry && ohpm install && cd ..
         shell: bash
 
       - name: Build HAP (Debug)
@@ -52,8 +60,8 @@ jobs:
           hvigorw assembleHap --mode module \
             -p product=default \
             -p buildMode=debug \
-            -p module=entry@default \
-            --no-daemon --analyze=normal
+            --no-daemon
+        shell: bash
 
       - name: Upload Debug HAP Artifact
         uses: actions/upload-artifact@v4
@@ -69,8 +77,8 @@ jobs:
           hvigorw assembleHap --mode module \
             -p product=default \
             -p buildMode=release \
-            -p module=entry@default \
-            --no-daemon --analyze=normal
+            --no-daemon
+        shell: bash
 
       - name: Upload Release HAP Artifact
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
