@@ -1,0 +1,14 @@
+{
+  "name": "pep-english",
+  "version": "1.0.0",
+  "description": "PEP小学英语 - 人教PEP版三年级起点",
+  "author": "pep",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ohos/hypium": "1.0.6"
+  },
+  "devDependencies": {
+    "@ohos/hvigor-ohos-plugin": "3.0.0",
+    "@ohos/hvigor": "3.0.0"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "app": {
+    "bundleName": "com.pep.english",
+    "vendor": "pep",
+    "versionCode": 1000000,
+    "versionName": "1.0.0",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name",
+    "apiTargetVersion": 10,
+    "compatibleVersion": 10,
+    "targetVersion": 10,
+    "devices": [
+      "phone",
+      "tablet"
+    ],
+    "mode": {
+      "uiMode": [
+        "portrait"
+      ]
+    }
+  }
+}

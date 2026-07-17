@@ -1,0 +1,65 @@
+name: Build HAP
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev
+        shell: bash
+
+      - name: Setup HarmonyOS CLI Tools
+        uses: ErBWs/setup-ohos@v2
+        with:
+          version: 6.1.1.280
+          cache: true
+
+      - name: Verify hvigorw
+        run: hvigorw -v
+
+      - name: Install project dependencies
+        run: |
+          chmod +x hvigorw
+          ./hvigorw install --no-daemon
+
+      - name: Build HAP (Debug)
+        run: |
+          ./hvigorw assembleHap --no-daemon --mode debug
+
+      - name: Upload Debug HAP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pep-english-debug
+          path: entry/build/outputs/hap/debug/*.hap
+          retention-days: 30
+
+      - name: Build HAP (Release)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          ./hvigorw assembleHap --no-daemon --mode release
+
+      - name: Upload Release HAP Artifact
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: actions/upload-artifact@v4
+        with:
+          name: pep-english-release
+          path: entry/build/outputs/hap/release/*.hap
+          retention-days: 30
