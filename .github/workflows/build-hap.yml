@@ -15,6 +15,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -32,12 +38,22 @@ jobs:
           version: 6.1.1.280
           cache: true
 
-      - name: Verify hvigorw
-        run: hvigorw -v
+      - name: Verify tools
+        run: |
+          java -version
+          node -v
+          hvigorw -v
+          ohpm -v
+        shell: bash
 
       - name: Build HAP (Debug)
         run: |
-          hvigorw assembleHap --no-daemon --mode debug
+          hvigorw clean --no-daemon
+          hvigorw assembleHap --mode module \
+            -p product=default \
+            -p buildMode=debug \
+            -p module=entry@default \
+            --no-daemon --analyze=normal
 
       - name: Upload Debug HAP Artifact
         uses: actions/upload-artifact@v4
@@ -49,7 +65,12 @@ jobs:
       - name: Build HAP (Release)
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
-          hvigorw assembleHap --no-daemon --mode release
+          hvigorw clean --no-daemon
+          hvigorw assembleHap --mode module \
+            -p product=default \
+            -p buildMode=release \
+            -p module=entry@default \
+            --no-daemon --analyze=normal
 
       - name: Upload Release HAP Artifact
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
