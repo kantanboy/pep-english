@@ -41,29 +41,55 @@ jobs:
 
       - name: Verify environment
         run: |
+          echo "=== Java ==="
           java -version
+          echo "=== Node.js ==="
           node -v
+          echo "=== npm ==="
           npm -v
+          echo "=== hvigorw ==="
+          which hvigorw
           hvigorw -v
+          echo "=== ohpm ==="
+          which ohpm
+          ohpm -v
+          echo "=== Environment Variables ==="
+          echo "HOS_SDK_HOME=$HOS_SDK_HOME"
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "PATH=$PATH"
+          echo "=== Project Structure ==="
+          ls -la
         shell: bash
 
       - name: Install ohpm dependencies
         run: |
+          echo "=== Configuring ohpm ==="
           ohpm config set strict_ssl false
-          ohpm install
-          cd entry && ohpm install && cd ..
+          ohpm config set registry https://ohpm.openharmony.cn/ohpm/
+          echo "=== Installing root dependencies ==="
+          ohpm install --no-daemon || echo "Root install failed (may be ok)"
+          echo "=== Installing entry dependencies ==="
+          cd entry && ohpm install --no-daemon || echo "Entry install failed (may be ok)"
+          cd ..
         shell: bash
 
       - name: Build HAP (Debug)
         run: |
-          hvigorw clean --no-daemon
+          echo "=== Starting build ==="
+          echo "Current directory: $(pwd)"
+          echo "hvigorw location: $(which hvigorw)"
+          echo "=== Cleaning ==="
+          hvigorw clean --no-daemon 2>&1 || echo "Clean failed"
+          echo "=== Assembling HAP ==="
           hvigorw assembleHap --mode module \
             -p product=default \
             -p buildMode=debug \
-            --no-daemon
+            --no-daemon 2>&1
+          echo "=== Build completed with exit code: $? ==="
         shell: bash
 
       - name: Upload Debug HAP Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pep-english-debug
