@@ -35,14 +35,9 @@ jobs:
       - name: Verify hvigorw
         run: hvigorw -v
 
-      - name: Install project dependencies
-        run: |
-          chmod +x hvigorw
-          ./hvigorw install --no-daemon
-
       - name: Build HAP (Debug)
         run: |
-          ./hvigorw assembleHap --no-daemon --mode debug
+          hvigorw assembleHap --no-daemon --mode debug
 
       - name: Upload Debug HAP Artifact
         uses: actions/upload-artifact@v4
@@ -54,7 +49,7 @@ jobs:
       - name: Build HAP (Release)
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
-          ./hvigorw assembleHap --no-daemon --mode release
+          hvigorw assembleHap --no-daemon --mode release
 
       - name: Upload Release HAP Artifact
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
